@@ -1,7 +1,7 @@
 
 ;;; Code:
 (progn(package-initialize))
-
+(org-mode)
 
 (defvar website-html-head
   "<link href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.1/css/bootstrap.min.css' rel='stylesheet'/>
@@ -9,12 +9,28 @@
 <script src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.1/js/bootstrap.min.js'></script>"
   )
 
-(defvar website-html-preamble 
+(defvar website-html-preamble
   "<div class='nav'>
 <ul>
 <li><a href='/index.html'>Home</a></li>
 </ul>
 </div>")
+
+;;; http://endlessparentheses.com/better-time-stamps-in-org-export.html
+(setq-default org-display-custom-times t)
+(setq org-time-stamp-custom-formats
+      '("<%d %b %Y>" . "<%d/%m/%y %a %H:%M>"))
+
+(defun endless/filter-timestamp (trans back _comm)
+  "Remove <> around time-stamps."
+  (pcase back
+    ((or `jekyll `html `twbs)
+     (replace-regexp-in-string "&[lg]t;" "" trans))
+    (`latex
+     (replace-regexp-in-string "[<>]" "" trans))))
+(setq org-export-filter-timestamp-functions (list))
+(add-to-list 'org-export-filter-timestamp-functions
+             #'endless/filter-timestamp)
 
 (setq org-publish-project-alist
       `(("org"
@@ -36,6 +52,6 @@
         ("website" :components ("org" "static"))
         )
       )
-(org-mode)
 (org-publish-project "website")
+
 ;;;
